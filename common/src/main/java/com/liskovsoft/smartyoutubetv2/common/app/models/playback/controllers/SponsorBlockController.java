@@ -100,7 +100,8 @@ public class SponsorBlockController extends BasePlayerController {
             return;
         }
 
-        boolean enabled = getSponsorBlockData().isSponsorBlockEnabled() && checkVideo(item) && !isChannelExcluded(item.channelId);
+        boolean enabled = getSponsorBlockData().isSponsorBlockEnabled() && checkVideo(item)
+                && !isChannelExcluded(item.channelId) && !isVideoExcluded(item.videoId);
         getPlayer().setButtonState(R.id.action_content_block, enabled ? PlayerUI.BUTTON_ON : PlayerUI.BUTTON_OFF);
 
         if (enabled) {
@@ -114,7 +115,7 @@ public class SponsorBlockController extends BasePlayerController {
         // Fix when using remote control.
         if (!getSponsorBlockData().isSponsorBlockEnabled() || !checkVideo(getPlayer().getVideo())) {
             disposeActions();
-        } else if (isChannelExcluded(metadata.getChannelId())) { // got channel id. check the exclusions
+        } else if (isChannelExcluded(metadata.getChannelId()) || isVideoExcluded(getPlayer().getVideo().videoId)) { // got channel id. check the exclusions
             getPlayer().setButtonState(R.id.action_content_block, PlayerUI.BUTTON_OFF);
             disposeActions();
         }
@@ -409,5 +410,9 @@ public class SponsorBlockController extends BasePlayerController {
 
     private boolean isChannelExcluded(String channelId) {
         return !mSkipExclude && getSponsorBlockData().isChannelExcluded(channelId);
+    }
+
+    private boolean isVideoExcluded(String videoId) {
+        return !mSkipExclude && getSponsorBlockData().isVideoExcluded(videoId);
     }
 }

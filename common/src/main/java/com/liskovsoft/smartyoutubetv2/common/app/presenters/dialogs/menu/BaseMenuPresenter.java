@@ -522,6 +522,10 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
             return;
         }
 
+        if (original.hasVideo()) {
+            getDialogPresenter().appendSingleButton(AppDialogUtil.createExcludeVideoFromContentBlockButton(getContext(), original, this::closeDialog));
+        }
+
         getDialogPresenter().appendSingleButton(AppDialogUtil.createExcludeFromContentBlockButton(getContext(), original, mServiceManager, this::closeDialog));
     }
 
