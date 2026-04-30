@@ -109,6 +109,7 @@ public class PlayerTweaksData implements ProfileChangeListener {
     private boolean mIsDontResizeVideoToFitDialogEnabled;
     private boolean mIsSuggestionsHorizontallyScrolled;
     private boolean mIsQueueRespectsPlaybackMode;
+    private boolean mIsContentBlockButtonMigrated;
     private final Runnable mPersistDataInt = this::persistDataInt;
 
     private PlayerTweaksData(Context context) {
@@ -762,6 +763,7 @@ public class PlayerTweaksData implements ProfileChangeListener {
         mIsQuickSkipVideosAltEnabled = Helpers.parseBoolean(split, 58, false);
         mIsAudioTimeStretchingEnabled = Helpers.parseBoolean(split, 59, true);
         mIsQueueRespectsPlaybackMode = Helpers.parseBoolean(split, 60, false);
+        mIsContentBlockButtonMigrated = Helpers.parseBoolean(split, 61, false);
 
         updateDefaultValues();
     }
@@ -789,7 +791,8 @@ public class PlayerTweaksData implements ProfileChangeListener {
                 mIsUnsafeAudioFormatsEnabled, null, mIsLoopShortsEnabled, mIsQuickSkipShortsEnabled, mIsRememberPositionOfLiveVideosEnabled,
                 mIsOculusQuestFixEnabled, null, mIsExtraLongSpeedListEnabled, mIsQuickSkipVideosEnabled, mIsNetworkErrorFixingDisabled, mIsCommentsPlacedLeft,
                 null, mIsAudioFocusEnabled, mIsDontResizeVideoToFitDialogEnabled, mIsSuggestionsHorizontallyScrolled,
-                mIsQuickSkipShortsAltEnabled, mIsQuickSkipVideosAltEnabled, mIsAudioTimeStretchingEnabled, mIsQueueRespectsPlaybackMode
+                mIsQuickSkipShortsAltEnabled, mIsQuickSkipVideosAltEnabled, mIsAudioTimeStretchingEnabled, mIsQueueRespectsPlaybackMode,
+                mIsContentBlockButtonMigrated
                 ));
     }
 
@@ -798,6 +801,11 @@ public class PlayerTweaksData implements ProfileChangeListener {
         if (mPlayerButtons >>> 30 == 0b1) { // check leftmost bit (old format)
             int bits = 32 - 24;
             mPlayerButtons = mPlayerButtons << bits >>> bits; // remove auto enabled bits
+        }
+
+        if (!mIsContentBlockButtonMigrated) {
+            mPlayerButtons |= PLAYER_BUTTON_CONTENT_BLOCK;
+            mIsContentBlockButtonMigrated = true;
         }
     }
 
