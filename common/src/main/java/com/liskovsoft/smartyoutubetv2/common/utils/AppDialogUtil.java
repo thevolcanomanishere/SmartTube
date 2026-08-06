@@ -756,6 +756,23 @@ public class AppDialogUtil {
                 });
     }
 
+    public static OptionItem createExcludeVideoFromContentBlockButton(
+            Context context, Video video, Runnable onClose) {
+        return UiOptionItem.from(
+                context.getString(
+                        SponsorBlockData.instance(context).isVideoExcluded(video.videoId) ?
+                                R.string.content_block_stop_excluding_video :
+                                R.string.content_block_exclude_video),
+                optionItem -> {
+                    if (video.hasVideo()) {
+                        SponsorBlockData.instance(context).toggleExcludeVideo(video.videoId);
+                    }
+                    if (onClose != null) {
+                        onClose.run();
+                    }
+                });
+    }
+
     public static OptionCategory createSpeedListCategory(Context context, PlayerManager playbackController) {
         PlayerData playerData = PlayerData.instance(context);
         List<OptionItem> items = new ArrayList<>();

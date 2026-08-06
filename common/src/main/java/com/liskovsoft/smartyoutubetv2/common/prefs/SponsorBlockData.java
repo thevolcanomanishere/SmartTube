@@ -31,6 +31,7 @@ public class SponsorBlockData {
     private final Set<String> mColorCategories = new LinkedHashSet<>();
     private final Set<SegmentAction> mActions = new LinkedHashSet<>();
     private final Set<String> mExcludedChannels = new LinkedHashSet<>();
+    private final Set<String> mExcludedVideos = new LinkedHashSet<>();
     private boolean mIsDontSkipSegmentAgainEnabled;
     private boolean mIsPaidContentNotificationEnabled;
     private long mIgnoredDurationMs;
@@ -163,6 +164,32 @@ public class SponsorBlockData {
         }
     }
 
+    public void excludeVideo(String videoId) {
+        mExcludedVideos.add(videoId);
+        persistState();
+    }
+
+    public void stopExcludingVideo(String videoId) {
+        mExcludedVideos.remove(videoId);
+        persistState();
+    }
+
+    public boolean isVideoExcluded(String videoId) {
+        return mExcludedVideos.contains(videoId);
+    }
+
+    public void toggleExcludeVideo(String videoId) {
+        if (videoId == null) {
+            return;
+        }
+
+        if (isVideoExcluded(videoId)) {
+            stopExcludingVideo(videoId);
+        } else {
+            excludeVideo(videoId);
+        }
+    }
+
     public Set<SegmentAction> getActions() {
         return Collections.unmodifiableSet(mActions);
     }
@@ -257,6 +284,7 @@ public class SponsorBlockData {
         String excludedChannels = Helpers.parseStr(split, 9);
         mIsPaidContentNotificationEnabled = Helpers.parseBoolean(split, 10, false);
         mIgnoredDurationMs = Helpers.parseLong(split, 11, 5_000);
+        String excludedVideos = Helpers.parseStr(split, 12);
 
         if (colorCategories != null) {
             String[] categoriesArr = Helpers.splitArray(colorCategories);
@@ -278,6 +306,16 @@ public class SponsorBlockData {
             mExcludedChannels.addAll(Arrays.asList(channelsArr));
         } else {
             mExcludedChannels.clear();
+        }
+
+        if (excludedVideos != null) {
+            String[] videosArr = Helpers.splitArray(excludedVideos);
+
+            mExcludedVideos.clear();
+
+            mExcludedVideos.addAll(Arrays.asList(videosArr));
+        } else {
+            mExcludedVideos.clear();
         }
 
         if (actions != null) {
@@ -308,11 +346,13 @@ public class SponsorBlockData {
         String colorCategories = Helpers.mergeArray(mColorCategories.toArray());
         String actions = Helpers.mergeArray(mActions.toArray());
         String excludedChannels = Helpers.mergeArray(mExcludedChannels.toArray());
+        String excludedVideos = Helpers.mergeArray(mExcludedVideos.toArray());
 
         mAppPrefs.setData(SPONSOR_BLOCK_DATA, Helpers.mergeData(
                 mIsSponsorBlockEnabled, null, null, null,
                 null, null, actions, colorCategories, mIsDontSkipSegmentAgainEnabled,
-                excludedChannels, mIsPaidContentNotificationEnabled, mIgnoredDurationMs
+                excludedChannels, mIsPaidContentNotificationEnabled, mIgnoredDurationMs,
+                excludedVideos
         ));
     }
 }

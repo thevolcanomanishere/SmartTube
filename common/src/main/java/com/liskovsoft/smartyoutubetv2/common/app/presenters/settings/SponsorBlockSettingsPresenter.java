@@ -38,6 +38,7 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
         appendSponsorBlockSwitch(settingsPresenter);
+        appendExcludeVideoButton(settingsPresenter);
         appendExcludeChannelButton(settingsPresenter);
         appendActionsCategory(settingsPresenter);
         appendColorMarkersCategory(settingsPresenter);
@@ -60,14 +61,17 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
         }
 
         final String channelId = video != null ? video.channelId : null;
+        final String videoId = video != null ? video.videoId : null;
         boolean isChannelExcluded = SponsorBlockData.instance(getContext()).isChannelExcluded(channelId);
+        boolean isVideoExcluded = SponsorBlockData.instance(getContext()).isVideoExcluded(videoId);
 
         OptionItem sponsorBlockOption = UiOptionItem.from(getContext().getString(R.string.enable),
                 option -> {
                     mContentBlockData.setSponsorBlockEnabled(option.isSelected());
                     SponsorBlockData.instance(getContext()).stopExcludingChannel(channelId);
+                    SponsorBlockData.instance(getContext()).stopExcludingVideo(videoId);
                 },
-                !isChannelExcluded && mContentBlockData.isSponsorBlockEnabled()
+                !isChannelExcluded && !isVideoExcluded && mContentBlockData.isSponsorBlockEnabled()
         );
 
         settingsPresenter.appendSingleSwitch(sponsorBlockOption);
@@ -169,6 +173,16 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
         }
 
         settingsPresenter.appendSingleButton(AppDialogUtil.createExcludeFromContentBlockButton(getContext(), video, MediaServiceManager.instance(), settingsPresenter::closeDialog));
+    }
+
+    private void appendExcludeVideoButton(AppDialogPresenter settingsPresenter) {
+        Video video = PlaybackPresenter.instance(getContext()).getVideo();
+
+        if (video == null || !video.hasVideo() || getViewManager().getTopView() != PlaybackView.class) {
+            return;
+        }
+
+        settingsPresenter.appendSingleButton(AppDialogUtil.createExcludeVideoFromContentBlockButton(getContext(), video, settingsPresenter::closeDialog));
     }
 
     private CharSequence getColoredString(int strResId, int colorResId) {
